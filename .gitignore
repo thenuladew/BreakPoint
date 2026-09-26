@@ -1,0 +1,37 @@
+# Environment & Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# Compiled C binaries (built by stage5)
+stages/stage5-binary/src/sovereign_inject_x86
+stages/stage5-binary/src/*.o
+
+# Generated artifacts (built by generator scripts)
+stages/stage3-crypto/transmission_log_48.txt
+stages/stage4-stego/dist/*.jpg
+stages/stage4-stego/dist/*.png
+stages/stage6-authorization/artifacts/capture.pcap
+stages/stage6-authorization/artifacts/sovereign_audit.log
+
+# Docker volumes / databases
+*.db
+*.db-shm
+*.db-wal
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

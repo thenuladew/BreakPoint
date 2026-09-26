@@ -1,0 +1,198 @@
+services:
+
+  # ─────────────────────────────────────────────
+  # EDGE PROXY  (the only service with host ports)
+  # ─────────────────────────────────────────────
+  proxy:
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    container_name: bp_proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # CTF Control Platform
+      - "8081:8081"   # Stage 1 – OSINT site
+      - "8082:8082"   # Stage 2 – Contractor Portal
+      - "8084:8084"   # File Share (Stages 4 & 5 artifacts)
+      - "8090:8090"   # Stage 6 – SOVEREIGN Auth (gated)
+    networks:
+      - ctf-frontend
+      - ctf-challenge
+      - sovereign-net
+    depends_on:
+      - platform
+      - stage1
+      - stage2
+      - fileshare
+      - stage6
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE     # needed to bind <1024 would be needed; our ports are high, but kept for clarity
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: "0.5"
+    pids_limit: 100
+
+  # ─────────────────────────────────────────────
+  # CTF CONTROL PLATFORM
+  # ─────────────────────────────────────────────
+  platform:
+    build:
+      context: ./platform
+      dockerfile: Dockerfile
+    container_name: bp_platform
+    restart: unless-stopped
+    expose:
+      - "5000"
+    networks:
+      - ctf-frontend
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - SECRET_KEY=${SECRET_KEY}
+      - FLAG_SALT=${FLAG_SALT}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    volumes:
+      - platform_db:/app/database
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: "0.5"
+    pids_limit: 100
+
+  # ─────────────────────────────────────────────
+  # STAGE 1 – Ghost in the Footprint (OSINT)
+  # ─────────────────────────────────────────────
+  stage1:
+    build:
+      context: ./stages/stage1-osint
+      dockerfile: Dockerfile
+    container_name: bp_stage1
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - ctf-challenge
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    cpus: "0.25"
+    pids_limit: 50
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # ─────────────────────────────────────────────
+  # STAGE 2 – The Contractor Portal (IDOR)
+  # ─────────────────────────────────────────────
+  stage2:
+    build:
+      context: ./stages/stage2-portal
+      dockerfile: Dockerfile
+    container_name: bp_stage2
+    restart: unless-stopped
+    expose:
+      - "5000"
+    networks:
+      - ctf-challenge
+    environment:
+      - FLAG_STAGE1=${FLAG_STAGE1}
+      - FLAG_STAGE2=${FLAG_STAGE2}
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: "0.5"
+    pids_limit: 100
+
+  # ─────────────────────────────────────────────
+  # FILE SHARE – Serves Stage 4 images & Stage 5 binary
+  # ─────────────────────────────────────────────
+  fileshare:
+    build:
+      context: ./stages/fileshare
+      dockerfile: Dockerfile
+    container_name: bp_fileshare
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - ctf-challenge
+    volumes:
+      - fileshare_data:/usr/share/nginx/html:ro
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    cpus: "0.25"
+    pids_limit: 50
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+
+  # ─────────────────────────────────────────────
+  # STAGE 6 – SOVEREIGN Authorization Service (Gated)
+  # ─────────────────────────────────────────────
+  stage6:
+    build:
+      context: ./stages/stage6-authorization
+      dockerfile: Dockerfile
+    container_name: bp_stage6
+    restart: unless-stopped
+    expose:
+      - "5000"
+    networks:
+      - sovereign-net
+      - ctf-frontend        # needs to reach platform for timer stop
+    environment:
+      - FLAG_STAGE6=${FLAG_STAGE6}
+      - STAGE5_AUTH_TOKEN=${STAGE5_AUTH_TOKEN}
+      - FRAUDULENT_SESSION_ID=${FRAUDULENT_SESSION_ID}
+      - PLATFORM_URL=http://platform:5000
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: "0.5"
+    pids_limit: 100
+
+# ─────────────────────────────────────────────
+# NAMED VOLUMES
+# ─────────────────────────────────────────────
+volumes:
+  platform_db:
+    driver: local
+  fileshare_data:
+    driver: local
+
+# ─────────────────────────────────────────────
+# NETWORKS
+# ─────────────────────────────────────────────
+networks:
+  ctf-frontend:
+    driver: bridge
+    # NOT internal – allows proxy ↔ platform communication through Docker DNS
+
+  ctf-challenge:
+    driver: bridge
+    internal: true          # No host/internet egress from challenge containers
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+
+  sovereign-net:
+    driver: bridge
+    internal: true          # Fully isolated segment for Stage 6
+    ipam:
+      config:
+        - subnet: 172.20.2.0/24
