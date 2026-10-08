@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}BREAKPOINT // Admin{% endblock %}
+{% block content %}
+<div class="page-inner">
+  <h2>// ADMIN PANEL //</h2>
+  <table class="scoreboard-table">
+    <thead>
+      <tr><th>ID</th><th>Team</th><th>Score</th><th>Stages Solved</th><th>Token</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for team in teams %}
+      <tr>
+        <td>{{ team.id }}</td>
+        <td>{{ team.name }}</td>
+        <td>{{ team.score }}</td>
+        <td>{{ team.stages_solved }}</td>
+        <td><code>{{ team.token[:8] }}…</code></td>
+        <td>
+          <form method="POST" action="/admin/reset_team/{{ team.id }}"
+                onsubmit="return confirm('Reset team {{ team.name }}?');">
+            <button class="btn btn-xs btn-danger">RESET</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

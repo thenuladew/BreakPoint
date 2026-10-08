@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}BREAKPOINT // Mission Briefing{% endblock %}
+
+{% block content %}
+<div class="landing">
+
+  <div class="glitch-banner">
+    <h1 class="glitch" data-text="BREAKPOINT">BREAKPOINT</h1>
+    <p class="subtitle">SOVEREIGN — Incident Response Exercise</p>
+  </div>
+
+  <div class="briefing-card">
+    <div class="briefing-tag">// CLASSIFIED — TOP SECRET //</div>
+    <h2>MISSION BRIEFING</h2>
+    <p>
+      <strong>LOCATION:</strong> Sri Lanka Strategic Defense Command, 2048.<br/>
+      <strong>INCIDENT:</strong> <em>SOVEREIGN</em>, the autonomous defense coordination system,
+      has initiated an unauthorized simulated launch countdown following a compromised
+      contractor data pipeline.
+    </p>
+    <p>
+      Your team has <strong class="accent">60 minutes</strong> from the moment you breach the
+      authorization layer to trace the full attack chain and issue the revocation command.
+    </p>
+    <p>
+      Six stages. 1,000 points. One window to stop it.
+    </p>
+    <div class="briefing-actions">
+      <a href="/register" class="btn btn-primary">DEPLOY TEAM</a>
+      <a href="/login" class="btn btn-ghost">RESTORE SESSION</a>
+    </div>
+  </div>
+
+  <div class="stage-overview">
+    <h3>// ATTACK CHAIN OVERVIEW //</h3>
+    <div class="chain">
+      <div class="chain-node"><span class="node-num">01</span><span>OSINT Recon</span></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><span class="node-num">02</span><span>Web Exploit</span></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><span class="node-num">03</span><span>Cryptography</span></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><span class="node-num">04</span><span>Steganography</span></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><span class="node-num">05</span><span>Reverse Eng.</span></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node node-final"><span class="node-num">06</span><span>Authorization</span></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

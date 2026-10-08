@@ -83,9 +83,6 @@ services:
     mem_limit: 64m
     cpus: "0.25"
     pids_limit: 50
-    read_only: true
-    tmpfs:
-      - /tmp
 
   # ─────────────────────────────────────────────
   # STAGE 2 – The Contractor Portal (IDOR)
@@ -124,8 +121,6 @@ services:
       - "80"
     networks:
       - ctf-challenge
-    volumes:
-      - fileshare_data:/usr/share/nginx/html:ro
     cap_drop:
       - ALL
     security_opt:
@@ -133,11 +128,6 @@ services:
     mem_limit: 64m
     cpus: "0.25"
     pids_limit: 50
-    read_only: true
-    tmpfs:
-      - /tmp
-      - /var/cache/nginx
-      - /var/run
 
   # ─────────────────────────────────────────────
   # STAGE 6 – SOVEREIGN Authorization Service (Gated)

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}BREAKPOINT // Scoreboard{% endblock %}
+{% block content %}
+<div class="page-inner">
+  <h2>// LIVE SCOREBOARD //</h2>
+  <table class="scoreboard-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Team</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for team in teams %}
+      <tr class="{% if loop.index == 1 %}rank-gold{% elif loop.index == 2 %}rank-silver{% elif loop.index == 3 %}rank-bronze{% endif %}">
+        <td>{{ loop.index }}</td>
+        <td>{{ team.name }}</td>
+        <td class="score-col">{{ team.score }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3">No teams yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

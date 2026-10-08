@@ -6,8 +6,18 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copy our custom config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Run as non-root (nginx user already exists in alpine image)
-RUN chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx
+# Pre-create all dirs the nginx worker needs to write to,
+# owned by the nginx user. Do this as root before USER switch.
+# /tmp/nginx.pid is used by our config (avoids needing /var/run write)
+RUN mkdir -p /var/cache/nginx/client_temp \
+             /var/cache/nginx/proxy_temp \
+             /var/cache/nginx/fastcgi_temp \
+             /var/cache/nginx/uwsgi_temp \
+             /var/cache/nginx/scgi_temp \
+    && chown -R nginx:nginx \
+             /var/cache/nginx \
+             /var/log/nginx \
+             /etc/nginx/conf.d
 
 USER nginx
 

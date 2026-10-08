@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}BREAKPOINT // Register Team{% endblock %}
+{% block content %}
+<div class="form-page">
+  <h2>// DEPLOY TEAM //</h2>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="POST" action="/register" class="ctf-form">
+    <label for="team_name">Team Designation</label>
+    <input type="text" id="team_name" name="team_name"
+           placeholder="e.g. CyberUnit-7" maxlength="40" required autofocus />
+    <button type="submit" class="btn btn-primary">INITIATE DEPLOYMENT</button>
+  </form>
+  <p class="form-alt">Already deployed? <a href="/login">Restore session →</a></p>
+</div>
+{% endblock %}

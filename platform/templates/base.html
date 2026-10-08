@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}BREAKPOINT – SOVEREIGN{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="/">
+        <span class="logo-bracket">[</span>
+        BREAK<span class="accent">POINT</span>
+        <span class="logo-bracket">]</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/scoreboard">SCOREBOARD</a>
+        {% if session.get('team_token') %}
+          <a href="/dashboard">MISSION</a>
+          <a href="/logout">LOG OUT</a>
+        {% else %}
+          <a href="/register">REGISTER</a>
+          <a href="/login">LOGIN</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <span>BREAKPOINT CTF // SOVEREIGN Incident Response Exercise // 2048</span>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
