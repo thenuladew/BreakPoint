@@ -1,15 +1,23 @@
 {% extends "base.html" %}
-{% block title %}BREAKPOINT // Register Team{% endblock %}
+{% block title %}Provision – SOVEREIGN{% endblock %}
 {% block content %}
-<div class="form-page">
-  <h2>// DEPLOY TEAM //</h2>
-  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
-  <form method="POST" action="/register" class="ctf-form">
-    <label for="team_name">Team Designation</label>
-    <input type="text" id="team_name" name="team_name"
-           placeholder="e.g. CyberUnit-7" maxlength="40" required autofocus />
-    <button type="submit" class="btn btn-primary">INITIATE DEPLOYMENT</button>
-  </form>
-  <p class="form-alt">Already deployed? <a href="/login">Restore session →</a></p>
+<div class="auth-wrapper">
+  <div class="auth-box">
+    <div class="auth-title">SOVEREIGN : PROVISION ACCESS</div>
+    <div class="auth-desc">Register a new investigator profile.</div>
+    
+    <form method="POST">
+      <input type="text" name="team_name" class="auth-input" placeholder="Investigator / Team Alias" required autocomplete="off" spellcheck="false" maxlength="40" />
+      <button type="submit" class="auth-btn">PROVISION</button>
+    </form>
+    
+    {% if error %}
+      <div class="auth-error">Error: {{ error }}</div>
+    {% endif %}
+
+    <div style="margin-top: 16px; font-size: 11px; text-align: center;">
+      <a href="/login" style="color:var(--text-dim)">[ RETURN TO AUTHENTICATION ]</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

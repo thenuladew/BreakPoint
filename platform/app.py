@@ -335,10 +335,6 @@ def submit_flag():
             "UPDATE teams SET score = score + ? WHERE id=?", (awarded, team["id"])
         )
 
-        # Stage 5 correct → start countdown timer
-        if stage_id == 5:
-            start_timer(team["id"])
-
         # Stage 6 correct → stop countdown timer
         if stage_id == 6:
             stop_timer(team["id"])
@@ -349,7 +345,6 @@ def submit_flag():
             "message": f"🎉 Correct! +{awarded} points awarded.",
             "points_awarded": awarded,
             "stage_id": stage_id,
-            "timer_started": stage_id == 5,
         })
 
     db.commit()
@@ -404,6 +399,18 @@ def get_hint():
 def api_timer():
     timer = get_timer(g.team["id"])
     return jsonify(timer)
+
+
+@app.route("/api/start_timer", methods=["POST"])
+@require_team
+def api_start_timer():
+    """Team manually clicks 'Start Challenge' — begins the 60-minute countdown."""
+    team_id = g.team["id"]
+    timer = get_timer(team_id)
+    if timer["started"]:
+        return jsonify({"success": False, "message": "Timer already started."})
+    start_timer(team_id)
+    return jsonify({"success": True, "message": "Challenge timer started! You have 60 minutes."})
 
 
 # ─────────────────────────────────────────────────────────────

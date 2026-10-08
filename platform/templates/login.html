@@ -1,16 +1,23 @@
 {% extends "base.html" %}
-{% block title %}BREAKPOINT // Login{% endblock %}
+{% block title %}Authenticate – SOVEREIGN{% endblock %}
 {% block content %}
-<div class="form-page">
-  <h2>// RESTORE SESSION //</h2>
-  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
-  <form method="POST" action="/login" class="ctf-form">
-    <label for="token">Team Token</label>
-    <input type="text" id="token" name="token"
-           placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-           pattern="[0-9a-f\-]{36}" required autofocus />
-    <button type="submit" class="btn btn-primary">RECONNECT</button>
-  </form>
-  <p class="form-alt">New team? <a href="/register">Deploy →</a></p>
+<div class="auth-wrapper">
+  <div class="auth-box">
+    <div class="auth-title">SOVEREIGN : AUTHENTICATION REQUIRED</div>
+    <div class="auth-desc">Please provide your authorized credentials to access the incident response platform.</div>
+    
+    <form method="POST">
+      <input type="text" name="token" class="auth-input" placeholder="Enter Access Token" required autocomplete="off" spellcheck="false" />
+      <button type="submit" class="auth-btn">AUTHENTICATE</button>
+    </form>
+    
+    {% if error %}
+      <div class="auth-error">Error: {{ error }}</div>
+    {% endif %}
+    
+    <div style="margin-top: 16px; font-size: 11px; text-align: center;">
+      <a href="/register" style="color:var(--text-dim)">[ PROVISION NEW ACCESS ]</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

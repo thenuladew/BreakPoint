@@ -1,0 +1,245 @@
+{% set solved_count = solved|length %}
+{% if solved_count == 0 %}{% set sys_state = 'operational' %}{% set sys_status = 'OPERATIONAL' %}
+{% elif solved_count <= 2 %}{% set sys_state = 'degraded' %}{% set sys_status = 'DEGRADED' %}
+{% elif solved_count <= 4 %}{% set sys_state = 'compromised' %}{% set sys_status = 'COMPROMISED' %}
+{% else %}{% set sys_state = 'critical' %}{% set sys_status = 'CRITICAL' %}{% endif %}
+
+{% extends "base.html" %}
+{% block title %}Incident Control – SOVEREIGN{% endblock %}
+
+{% block head %}
+  <meta name="timer-remaining" content="{{ timer.remaining_s }}" />
+  <meta name="timer-started"   content="{{ 'true' if timer.started else 'false' }}" />
+  <meta name="timer-expired"   content="{{ 'true' if timer.expired else 'false' }}" />
+  <meta name="timer-stopped"   content="{{ 'true' if timer.stopped else 'false' }}" />
+  <meta name="team-token"      content="{{ session.get('team_token', '') }}" />
+{% endblock %}
+
+{% block content %}
+<!-- ═══════════════════════════════════════════════════════
+     INTRO SCREEN
+     ═══════════════════════════════════════════════════════ -->
+{% if not timer.started %}
+<div id="intro-screen">
+  <div id="intro-output"></div>
+  <button id="btn-begin" onclick="startChallenge()">[ BEGIN INVESTIGATION ]</button>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════
+     DASHBOARD
+     ═══════════════════════════════════════════════════════ -->
+<div id="dashboard" class="{% if timer.started %}active{% endif %}">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-group">
+      <span>SOVEREIGN <span class="sep">|</span> NATIONAL INFRASTRUCTURE INTELLIGENCE SYSTEM</span>
+    </div>
+    <div class="topbar-group">
+      <span>BUILD <span class="val">9.2.4-rc3</span></span>
+      <span class="sep">|</span>
+      <span>SESSION <span class="val active">ACTIVE</span></span>
+      <span class="sep">|</span>
+      <span>CLASSIFICATION <span class="val danger">TOP SECRET</span></span>
+      <span class="sep">|</span>
+      <a href="/logout">[ TERMINATE ]</a>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="statusbar">
+    <div class="status-item">
+      <div class="status-dot-live" {% if timer.expired %}style="background:var(--danger-bright)"{% endif %}></div>
+      <span class="status-label">System</span>
+      {% if timer.expired %}
+        <span class="status-value danger">LOCKDOWN</span>
+      {% else %}
+        <span class="status-value {% if sys_state == 'critical' %}danger{% elif sys_state == 'compromised' or sys_state == 'degraded' %}warn{% else %}ok{% endif %}">{{ sys_status }}</span>
+      {% endif %}
+    </div>
+    <div class="status-item">
+      <span class="status-label">Incident</span>
+      <span class="status-value danger">SOV-2741</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Operator</span>
+      <span class="status-value">{{ team.name }}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Integrity</span>
+      <span class="status-value" id="hud-score">{{ team.score }}</span>
+    </div>
+    <div class="status-item" style="margin-left:auto;">
+      <span class="status-label">Window</span>
+      {% if not timer.started %}
+        <span class="status-value" id="hud-timer">--:--</span>
+      {% elif timer.expired %}
+        <span class="status-value danger" id="hud-timer">EXPIRED</span>
+      {% elif timer.stopped %}
+        <span class="status-value ok" id="hud-timer">RESOLVED</span>
+      {% else %}
+        <span class="status-value active" id="hud-timer">{{ '%02d'|format(timer.remaining_s // 60) }}:{{ '%02d'|format(timer.remaining_s % 60) }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- WORKSPACE -->
+  <div class="workspace">
+
+    <!-- LEFT: NODE MAP -->
+    <div class="panel-left">
+      <div class="panel-title">Incident Nodes</div>
+      <div class="node-list">
+        {% set node_names = {
+           1: "Personnel Database",
+           2: "External Access",
+           3: "Secure Communications",
+           4: "Archival Evidence",
+           5: "AI Governance",
+           6: "SOVEREIGN Core"
+        } %}
+        
+        {% for stage in stages %}
+          {% set is_solved = stage.id in solved %}
+          {% set is_locked = stage.id > 1 and (stage.id - 1) not in solved %}
+          {% set is_active = not is_locked and not is_solved %}
+          
+          <div class="node-entry {% if loop.first %}active{% endif %} {% if is_locked %}locked{% endif %} {% if is_solved %}solved{% endif %}" onclick="selectNode({{ stage.id }}, {{ 'true' if is_locked else 'false' }})" id="nav-node-{{ stage.id }}">
+            <div class="node-dot {% if is_solved %}danger{% elif is_locked %}dim{% else %}warn{% endif %}"></div>
+            <div class="node-info">
+              <div class="node-id">NODE 0{{ stage.id }}</div>
+              <div class="node-name">{{ node_names[stage.id] }}</div>
+              {% if is_solved %}
+                <div class="node-status-text compromised">STATUS: {% if stage.id == 6 %}HIJACKED{% elif stage.id == 4 %}RECOVERED{% else %}COMPROMISED{% endif %}</div>
+              {% elif is_locked %}
+                <div class="node-status-text encrypted">STATUS: ENCRYPTED</div>
+              {% else %}
+                <div class="node-status-text investigating">STATUS: INVESTIGATING</div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- CENTER: INVESTIGATION PANE -->
+    <div class="panel-main">
+      {% if timer.expired %}
+        <div class="critical-banner">CRITICAL ERROR: TIMEOUT EXCEEDED. SYSTEM LOCKDOWN INITIATED.</div>
+      {% endif %}
+      {% if timer.stopped %}
+        <div class="resolved-banner">INCIDENT RESOLVED. THREAT NEUTRALIZED.</div>
+      {% endif %}
+
+      {% for stage in stages %}
+        {% set is_solved = stage.id in solved %}
+        {% set is_locked = stage.id > 1 and (stage.id - 1) not in solved %}
+        
+        <div class="pane-view {% if loop.first %}active{% endif %}" id="view-node-{{ stage.id }}">
+          <div class="pane-header">
+            <div class="pane-node-id">NODE 0{{ stage.id }} // CLASSIFIED</div>
+            <div class="pane-node-title">{{ node_names[stage.id] }}</div>
+            {% if is_solved %}
+              <div class="pane-badge compromised">STATUS: {% if stage.id == 6 %}HIJACKED{% elif stage.id == 4 %}RECOVERED{% else %}COMPROMISED{% endif %}</div>
+            {% elif is_locked %}
+              <div class="pane-badge encrypted">STATUS: ENCRYPTED</div>
+            {% else %}
+              <div class="pane-badge investigating">STATUS: INVESTIGATING</div>
+            {% endif %}
+          </div>
+          <div class="pane-body">
+            <div class="pane-section-title">Mission Parameters</div>
+            <div class="pane-text">
+              {% if is_locked %}
+                [ ACCESS DENIED ]<br><br>
+                Decryption key missing. Resolution of Node 0{{ stage.id - 1 }} is required to proceed.
+              {% else %}
+                {{ stage.title }}<br><br>
+                
+                <div style="margin-top: 10px; margin-bottom: 15px;">
+                  {% if stage.id == 1 %}
+                    <a href="http://localhost:8081" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: EXTERNAL NODE ]</a>
+                  {% elif stage.id == 2 %}
+                    <a href="http://localhost:8082" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: CONTRACTOR PORTAL ]</a>
+                  {% elif stage.id == 3 %}
+                    <a href="#" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ DOWNLOAD: SECURE_COMMS_INTERCEPT ]</a>
+                  {% elif stage.id == 4 %}
+                    <a href="http://localhost:8084" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: ARCHIVE NODE ]</a>
+                  {% elif stage.id == 5 %}
+                    <a href="http://localhost:8084/sovereign_tool.bin" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ DOWNLOAD: SUSPICIOUS BINARY ]</a>
+                  {% elif stage.id == 6 %}
+                    <a href="http://localhost:8090" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: SOVEREIGN CORE ]</a>
+                  {% endif %}
+                </div>
+
+                {% if is_solved %}
+                  <span class="pane-text-danger">> INTEGRITY COMPROMISED. LOGS RECOVERED.</span>
+                {% else %}
+                  <span style="color:var(--text-dim)">> AWAITING INVESTIGATOR PAYLOAD...</span>
+                {% endif %}
+              {% endif %}
+            </div>
+
+            {% if not is_locked and not is_solved %}
+              <div class="pane-section-title">Payload Injection</div>
+              <form class="terminal-prompt" onsubmit="submitFlag(event, {{ stage.id }})">
+                <span class="prompt-symbol">❯</span>
+                <input type="text" class="prompt-input flag-input" placeholder="BP{...}" autocomplete="off" spellcheck="false" />
+                <button type="submit" class="prompt-exec">EXEC</button>
+              </form>
+              <div class="terminal-feedback" id="feedback-{{ stage.id }}"></div>
+              
+              <div class="intel-row">
+                <button class="btn-intel" type="button" onclick="getHint({{ stage.id }}, 1)">[ REQUEST INTEL 1 // -5% ]</button>
+                <button class="btn-intel" type="button" onclick="getHint({{ stage.id }}, 2)">[ REQUEST INTEL 2 // -10% ]</button>
+              </div>
+              <div class="intel-display" id="hint-{{ stage.id }}"></div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- RIGHT: SYSTEM LOG -->
+    <div class="panel-right">
+      <div class="panel-title">System Events</div>
+      <div class="log-list" id="sys-log">
+        <div class="log-entry"><span class="log-time sys-time"></span> <span class="log-msg">Session initialized</span></div>
+        <div class="log-entry"><span class="log-time sys-time"></span> <span class="log-msg ok">Clearance: VERIFIED</span></div>
+        <div class="log-entry"><span class="log-time sys-time"></span> <span class="log-msg danger">Incident SOV-2741 loaded</span></div>
+        {% for stage in stages %}
+          {% if stage.id in solved %}
+            <div class="log-entry"><span class="log-time sys-time"></span> <span class="log-msg danger">Node 0{{ stage.id }}: COMPROMISED</span></div>
+          {% elif stage.id > 1 and (stage.id - 1) not in solved %}
+            <!-- Locked -->
+          {% else %}
+            <div class="log-entry"><span class="log-time sys-time"></span> <span class="log-msg warn">Node 0{{ stage.id }}: INVESTIGATING</span></div>
+          {% endif %}
+        {% endfor %}
+        <div class="log-entry"><span class="log-time sys-time"></span> <span class="log-msg">Monitoring active...</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottombar">
+    <span>SOVEREIGN CORE OS v9.2.4 // CLASSIFIED // RESTRICTED ACCESS</span>
+    <span>CONNECTED: 172.20.1.0/24 // ENCRYPTED CHANNEL</span>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    // Set current time on logs
+    document.querySelectorAll('.sys-time').forEach(el => {
+      const now = new Date();
+      el.textContent = now.toTimeString().split(' ')[0];
+    });
+  </script>
+  <script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

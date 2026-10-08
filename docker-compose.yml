@@ -53,6 +53,12 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - FLAG_SALT=${FLAG_SALT}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - FLAG_STAGE1=${FLAG_STAGE1}
+      - FLAG_STAGE2=${FLAG_STAGE2}
+      - FLAG_STAGE3=${FLAG_STAGE3}
+      - FLAG_STAGE4=${FLAG_STAGE4}
+      - FLAG_STAGE5=${FLAG_STAGE5}
+      - FLAG_STAGE6=${FLAG_STAGE6}
     volumes:
       - platform_db:/app/database
     cap_drop:

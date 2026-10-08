@@ -1,0 +1,134 @@
+/* ctOS Corporation – Public Website Stylesheet */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cyan:    #00e5ff;
+  --cyan-dim:#00a8bb;
+  --dark:    #07090d;
+  --card:    #0b0f18;
+  --border:  #132030;
+  --text:    #c0ccd8;
+  --text-dim:#4a6070;
+  --mono:    'Courier New', monospace;
+  --sans:    Arial, sans-serif;
+}
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Nav ───────────────────────────────────────────────────── */
+nav {
+  background: #080a10;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-inner {
+  max-width: 1100px; margin: 0 auto;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  text-shadow: 0 0 12px rgba(0,229,255,0.4);
+}
+.nav-logo span { color: #fff; }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: 0.82rem; letter-spacing: 1px; color: var(--text-dim); }
+.nav-links a:hover { color: var(--cyan); text-decoration: none; }
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.hero {
+  padding: 80px 24px 64px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: radial-gradient(ellipse at center top, rgba(0,100,140,0.12) 0%, transparent 70%);
+}
+.hero-tag {
+  font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 4px; color: var(--cyan); margin-bottom: 16px;
+}
+.hero h1 {
+  font-size: 2.6rem; font-weight: 700;
+  color: #e8f4f8; margin-bottom: 16px; line-height: 1.2;
+}
+.hero h1 span { color: var(--cyan); }
+.hero p { max-width: 600px; margin: 0 auto 28px; color: var(--text-dim); font-size: 1rem; }
+.btn-primary {
+  display: inline-block;
+  background: var(--cyan); color: #000;
+  font-weight: bold; font-size: 0.85rem; letter-spacing: 1px;
+  padding: 12px 32px; border-radius: 3px;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.85; text-decoration: none; }
+
+/* ── Section Styles ────────────────────────────────────────── */
+section { padding: 60px 24px; border-bottom: 1px solid var(--border); }
+.container { max-width: 1100px; margin: 0 auto; }
+.section-tag {
+  font-family: var(--mono); font-size: 0.68rem;
+  letter-spacing: 3px; color: var(--cyan-dim); margin-bottom: 8px;
+}
+.section-title { font-size: 1.6rem; color: #d8ecf4; margin-bottom: 12px; }
+.section-sub   { color: var(--text-dim); max-width: 600px; margin-bottom: 40px; }
+
+/* ── Services Grid ─────────────────────────────────────────── */
+.services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.service-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 4px; padding: 24px;
+}
+.service-icon { font-size: 1.6rem; margin-bottom: 10px; }
+.service-card h3 { font-size: 0.95rem; color: #d0e8f0; margin-bottom: 6px; }
+.service-card p  { font-size: 0.82rem; color: var(--text-dim); }
+
+/* ── Stats Row ─────────────────────────────────────────────── */
+.stats-row { display: flex; gap: 40px; flex-wrap: wrap; margin-top: 20px; }
+.stat-item .stat-num { font-size: 2rem; color: var(--cyan); font-weight: bold; font-family: var(--mono); }
+.stat-item .stat-label { font-size: 0.75rem; color: var(--text-dim); letter-spacing: 1px; }
+
+/* ── Team Grid ─────────────────────────────────────────────── */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.team-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 4px; padding: 20px; text-align: center;
+}
+.team-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: #0e1a22; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; margin: 0 auto 12px;
+}
+.team-card h3 { font-size: 0.9rem; color: #d0e8f0; margin-bottom: 4px; }
+.team-card .role { font-size: 0.74rem; color: var(--cyan-dim); margin-bottom: 4px; }
+.team-card .username { font-family: var(--mono); font-size: 0.70rem; color: var(--text-dim); }
+.contractor-badge {
+  display: inline-block; font-size: 0.60rem; letter-spacing: 1px;
+  color: var(--cyan); border: 1px solid var(--cyan-dim);
+  padding: 1px 6px; border-radius: 2px; margin-top: 6px;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+footer {
+  margin-top: auto; padding: 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.75rem; color: var(--text-dim);
+  font-family: var(--mono);
+}
+
