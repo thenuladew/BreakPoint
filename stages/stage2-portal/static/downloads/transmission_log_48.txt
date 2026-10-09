@@ -1,0 +1,4 @@
+[ENCRYPTED PAYLOAD]
+This file will be replaced by the output of the Stage 3 generation script.
+If you see this, Stage 3 artifacts have not been generated yet.
+

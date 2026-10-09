@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | Kavach Systems</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
+        .nav { background: #0056b3; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: bold; }
+        .user-info a { color: white; text-decoration: none; margin-left: 20px; font-weight: bold; }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        h2 { border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        .doc-list { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
+        .doc-item { padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; }
+        .doc-item:last-child { border-bottom: none; }
+        .doc-title { font-weight: bold; font-size: 16px; color: #0056b3; text-decoration: none; }
+        .doc-title:hover { text-decoration: underline; }
+        .doc-meta { color: #6c757d; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <div class="logo">Kavach Systems</div>
+        <div class="user-info">
+            Logged in as: <strong>{{ user }}</strong>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>My Documents</h2>
+        
+        <div class="doc-list">
+            {% for doc in documents %}
+            <div class="doc-item">
+                <div>
+                    <a href="/portal/document?id={{ doc.id }}" class="doc-title">{{ doc.title }}</a>
+                    <div class="doc-meta">Published: {{ doc.date }}</div>
+                </div>
+                <div>
+                    <span style="background:#e9ecef; padding: 5px 10px; border-radius: 4px; font-size: 12px;">ID: {{ doc.id }}</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="doc-item" style="color: #6c757d;">No documents found for your account.</div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+

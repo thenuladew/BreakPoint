@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document Viewer | Kavach Systems</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
+        .nav { background: #0056b3; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: bold; }
+        .user-info a { color: white; text-decoration: none; margin-left: 20px; font-weight: bold; }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        
+        .document-viewer { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); min-height: 400px; }
+        .doc-header { border-bottom: 2px solid #e9ecef; padding-bottom: 20px; margin-bottom: 30px; }
+        .doc-title { font-size: 24px; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .doc-meta { color: #6c757d; font-size: 14px; }
+        .doc-content { font-size: 16px; line-height: 1.6; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; background: #0a0c10; color: #00ff88; padding: 30px; border-radius: 4px; overflow-x: auto; }
+        
+        .error { color: #dc3545; font-size: 18px; text-align: center; padding: 40px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #0056b3; text-decoration: none; font-weight: bold; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <div class="logo">Kavach Systems</div>
+        <div class="user-info">
+            Logged in as: <strong>{{ user }}</strong>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
+        
+        <div class="document-viewer">
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% else %}
+                <div class="doc-header">
+                    <div class="doc-title">{{ doc.title }}</div>
+                    <div class="doc-meta">Document ID: {{ doc.id }} | Published: {{ doc.date }}</div>
+                </div>
+                <div class="doc-content">{{ doc.content | safe }}</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+
