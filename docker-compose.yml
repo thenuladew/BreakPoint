@@ -122,6 +122,8 @@ services:
       context: ./stages/fileshare
       dockerfile: Dockerfile
     container_name: bp_fileshare
+    volumes:
+      - ./stages/fileshare/data:/usr/share/nginx/html
     restart: unless-stopped
     expose:
       - "80"
