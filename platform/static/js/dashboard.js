@@ -21,9 +21,9 @@ const introLines = [
   { text: 'AUTHENTICATION SUCCESSFUL', cls: 'ok', delay: 25, pause: 500 },
   { text: 'CLEARANCE: LEVEL 4 — VERIFIED', cls: 'ok', delay: 25, pause: 800 },
   { text: '', cls: '', delay: 0, pause: 400 },
-  { text: '╔══════════════════════════════════════════════════════════╗', cls: 'sys', delay: 5, pause: 100 },
-  { text: '║  W A R N I N G                                         ║', cls: 'danger', delay: 5, pause: 100 },
-  { text: '╚══════════════════════════════════════════════════════════╝', cls: 'sys', delay: 5, pause: 600 },
+  { text: '─── ─────────────────────────────────────────────── ───', cls: 'sys', delay: 3, pause: 100 },
+  { text: '  [ ! ]  W A R N I N G  — RESTRICTED INCIDENT CONDITIONS  ', cls: 'danger', delay: 5, pause: 100 },
+  { text: '─── ─────────────────────────────────────────────── ───', cls: 'sys', delay: 3, pause: 600 },
   { text: '', cls: '', delay: 0, pause: 200 },
   { text: 'This system is currently operating under RESTRICTED INCIDENT CONDITIONS.', cls: 'warn', delay: 20, pause: 300 },
   { text: '', cls: '', delay: 0, pause: 200 },
@@ -163,6 +163,7 @@ async function submitFlag(e, stageId) {
   const data = await res.json();
 
   if (data.success) {
+    triggerCompromisedFlash();
     feedback.textContent = data.message;
     feedback.classList.add("ok");
     
@@ -211,3 +212,72 @@ async function getHint(stageId, hintNum) {
     hintEl.textContent = "> ERROR: " + (data.message || "COULD NOT LOAD INTEL.");
   }
 }
+
+// ── Timer urgency watcher ─────────────────────────────
+function applyTimerClass(timerEl) {
+  const text = timerEl.textContent.trim();
+  const parts = text.split(':');
+  let seconds = 0;
+  if (parts.length === 2) {
+    seconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+  } else if (parts.length === 3) {
+    seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+  }
+  timerEl.classList.remove('timer-warn', 'timer-critical', 'timer-expired-class');
+  if (isNaN(seconds) || seconds <= 0) {
+    timerEl.classList.add('timer-expired-class');
+  } else if (seconds < 300) {
+    timerEl.classList.add('timer-critical');
+  } else if (seconds < 600) {
+    timerEl.classList.add('timer-warn');
+  }
+}
+
+function initTimerWatcher() {
+  const timerEl = document.getElementById('hud-timer');
+  if (!timerEl) return;
+  applyTimerClass(timerEl);
+  const obs = new MutationObserver(() => applyTimerClass(timerEl));
+  obs.observe(timerEl, { childList: true, subtree: true, characterData: true });
+}
+
+// ── COMPROMISED flash overlay ─────────────────────────
+function triggerCompromisedFlash() {
+  const overlay = document.createElement('div');
+  overlay.className = 'compromised-flash';
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 950);
+}
+
+// ── Bottom ticker ─────────────────────────────────────
+function initTicker() {
+  const bar = document.querySelector('.bottombar');
+  if (!bar) return;
+  const messages = [
+    'SOVEREIGN CORE OS v9.2.4 // CLASSIFIED // RESTRICTED ACCESS',
+    'NODE INTEGRITY MONITORING ACTIVE',
+    'ENCRYPTED CHANNEL: 172.20.1.0/24',
+    'INCIDENT SOV-2741: ACTIVE — UNAUTHORIZED LATERAL MOVEMENT DETECTED',
+    'FORENSIC DATA COLLECTION IN PROGRESS',
+    'CLEARANCE LEVEL 4 REQUIRED FOR ALL OPERATIONS',
+    'SOVEREIGN AI SUBSYSTEMS: PARTIAL LOCKDOWN',
+    'BIOMETRIC AUTHENTICATION: VERIFIED',
+    'NETWORK ANOMALY DETECTED ON SEGMENT B-14',
+  ];
+  const msg = messages.join('   //   ');
+  bar.innerHTML = `<div class="bottombar-ticker"><span class="ticker-inner">${msg}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${msg}</span></div>`;
+}
+
+// ── Log entry animation ───────────────────────────────
+function animateLastLogEntry() {
+  const entries = document.querySelectorAll('.log-entry');
+  if (entries.length > 0) {
+    entries[entries.length - 1].classList.add('new-entry');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTimerWatcher();
+  initTicker();
+  animateLastLogEntry();
+});

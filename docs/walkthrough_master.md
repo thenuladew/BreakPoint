@@ -48,7 +48,7 @@ Welcome to the definitive guide for completing the **BREAKPOINT** CTF. This guid
 6. The decrypted text will reveal:
    - The Stage 3 Flag.
    - The hidden directory for Stage 4: `/repo/classified_assets_2048/`
-   - The Steghide passphrase for Stage 4: `s0vere1gn_w4rn1ng_2048`
+   - The Steghide passphrase for Stage 4: `sovereign_override_991`
    **Flag 3**: `BP{vigenere_silence_broken}`
 7. Submit the flag to unlock Stage 4.
 
@@ -65,7 +65,7 @@ Welcome to the definitive guide for completing the **BREAKPOINT** CTF. This guid
    ```bash
    steghide extract -sf payload_telemetry.jpg
    ```
-4. When prompted for a passphrase, enter the one found in Stage 3: `s0vere1gn_w4rn1ng_2048`.
+4. When prompted for a passphrase, enter the one found in Stage 3: `sovereign_override_991`.
 5. This will extract a hidden `payload.txt` file.
 6. Read the extracted file. It contains the Stage 4 Flag and the path to the Stage 5 binary (`/tools/sovereign_inject_x86`).
    **Flag 4**: `BP{steghide_payload_extracted}`

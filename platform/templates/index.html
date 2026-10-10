@@ -1,52 +1,632 @@
 {% extends "base.html" %}
-{% block title %}BREAKPOINT // Mission Briefing{% endblock %}
+{% block title %}BREAKPOINT // SOVEREIGN — Mission Briefing{% endblock %}
+
+{% block head %}
+<style>
+  /* ─── Reset / Containment ─────────────────────────────────── */
+  html, body { height: 100%; overflow: hidden; }
+
+  /* ─── Background Layer ────────────────────────────────────── */
+  .war-room {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-family: var(--font);
+  }
+
+  /* ─── Hex-grid SVG background ─────────────────────────────── */
+  .hex-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  /* ─── Radar canvas ────────────────────────────────────────── */
+  .radar-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .radar {
+    position: relative;
+    width: min(80vw, 80vh);
+    height: min(80vw, 80vh);
+    opacity: 0.13;
+  }
+  /* Concentric rings */
+  .radar::before,
+  .radar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+  }
+  .radar-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  /* Cross-hairs */
+  .radar-cross-h,
+  .radar-cross-v {
+    position: absolute;
+    background: var(--accent);
+    opacity: 0.5;
+    top: 50%; left: 0;
+    width: 100%; height: 1px;
+    transform: translateY(-50%);
+  }
+  .radar-cross-v {
+    top: 0; left: 50%;
+    width: 1px; height: 100%;
+    transform: translateX(-50%);
+  }
+  /* Sweep cone + glow */
+  .radar-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 290deg,
+      rgba(30, 144, 255, 0.55) 340deg,
+      rgba(30, 144, 255, 0.12) 355deg,
+      transparent 360deg
+    );
+    animation: sweep 4s linear infinite;
+    transform-origin: center center;
+  }
+  @keyframes sweep {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  /* Ping blips */
+  .radar-blip {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px 3px rgba(30, 144, 255, 0.7);
+    animation: blip-fade 4s ease-out infinite;
+  }
+  @keyframes blip-fade {
+    0%   { opacity: 1; }
+    60%  { opacity: 0.8; }
+    100% { opacity: 0; }
+  }
+
+  /* ─── Scan-lines overlay ──────────────────────────────────── */
+  .scanlines {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0, 0, 0, 0.18) 3px,
+      rgba(0, 0, 0, 0.18) 4px
+    );
+  }
+
+  /* ─── Content wrapper ─────────────────────────────────────── */
+  .wr-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: min(900px, 96vw);
+    max-height: 98vh;
+  }
+
+  /* ─── Header cluster ──────────────────────────────────────── */
+  .wr-header { text-align: center; line-height: 1; }
+
+  /* CLASSIFIED badge */
+  .classified-badge {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--danger-bright);
+    border: 1px solid var(--danger-bright);
+    padding: 2px 10px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    animation: badge-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(204, 34, 34, 0.6); }
+    50%       { opacity: 0.65; box-shadow: 0 0 14px rgba(204, 34, 34, 0.2); }
+  }
+
+  /* Glitch title */
+  .glitch-title {
+    position: relative;
+    display: inline-block;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 900;
+    letter-spacing: 10px;
+    color: var(--text-bright);
+    text-transform: uppercase;
+    user-select: none;
+  }
+  .glitch-title::before,
+  .glitch-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+  .glitch-title::before {
+    color: var(--danger-bright);
+    clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+    animation: glitch-top 3.5s steps(1) infinite;
+  }
+  .glitch-title::after {
+    color: var(--accent);
+    clip-path: polygon(0 60%, 100% 60%, 100% 75%, 0 75%);
+    animation: glitch-bot 3.5s steps(1) infinite;
+    animation-delay: 0.15s;
+  }
+  @keyframes glitch-top {
+    0%,  90%, 100% { transform: translate(0,0);          opacity: 0; }
+    91%            { transform: translate(-3px, -2px);    opacity: 1; }
+    92%            { transform: translate(3px,  1px);     opacity: 1; }
+    93%            { transform: translate(-2px, 2px);     opacity: 1; }
+    94%            { transform: translate(0, 0);           opacity: 0; }
+  }
+  @keyframes glitch-bot {
+    0%,  92%, 100% { transform: translate(0,0);           opacity: 0; }
+    93%            { transform: translate(3px,  2px);     opacity: 1; }
+    94%            { transform: translate(-3px,-1px);     opacity: 1; }
+    95%            { transform: translate(2px,  1px);     opacity: 1; }
+    96%            { transform: translate(0, 0);           opacity: 0; }
+  }
+
+  .wr-subtitle {
+    margin-top: 6px;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ─── Terminal briefing card ──────────────────────────────── */
+  .terminal-card {
+    width: 100%;
+    background: #020408;
+    border: 1px solid var(--border-active, #1a3a5c);
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(30, 144, 255, 0.08), inset 0 0 40px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #060c14;
+    border-bottom: 1px solid var(--border);
+    padding: 7px 12px;
+  }
+  .term-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .term-dot.red    { background: #cc3333; }
+  .term-dot.yellow { background: #b8860b; }
+  .term-dot.green  { background: #1a7a3a; }
+  .term-filename {
+    margin-left: 8px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+  }
+  .term-body {
+    padding: 14px 20px;
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: var(--text-mid);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+  }
+  .term-line { margin: 0; }
+  .term-line .k { color: var(--text-dim); }
+  .term-line .v { color: var(--text-bright); }
+  .term-line .hl { color: var(--danger-bright); font-weight: bold; }
+  .term-line .acc { color: var(--accent); font-weight: bold; }
+  .term-line-full {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+  }
+  .term-cursor {
+    display: inline-block;
+    width: 8px; height: 12px;
+    background: var(--accent);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+    margin-left: 4px;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ─── Hex attack chain ────────────────────────────────────── */
+  .attack-chain-wrap {
+    width: 100%;
+    text-align: center;
+  }
+  .chain-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .hex-chain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: nowrap;
+  }
+  /* Hex node */
+  .hex-node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 84px;
+    height: 90px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: #040a10;
+    border: none;
+    cursor: default;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  /* Hex border via layered pseudo-element */
+  .hex-node::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: #050d18;
+    z-index: 0;
+  }
+  /* Glow outline using drop-shadow on the node itself */
+  .hex-node {
+    filter: drop-shadow(0 0 4px rgba(30, 144, 255, 0.25));
+    transition: filter 0.25s ease, transform 0.25s ease;
+  }
+  .hex-node:hover {
+    filter: drop-shadow(0 0 12px rgba(30, 144, 255, 0.8));
+    transform: scale(1.07);
+  }
+  .hex-node.final {
+    filter: drop-shadow(0 0 4px rgba(204, 34, 34, 0.3));
+  }
+  .hex-node.final:hover {
+    filter: drop-shadow(0 0 12px rgba(204, 34, 34, 0.9));
+    transform: scale(1.07);
+  }
+  .hex-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    pointer-events: none;
+  }
+  .hex-num {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .hex-node.final .hex-num { color: var(--danger-bright); }
+  .hex-label {
+    font-size: 8px;
+    letter-spacing: 0.5px;
+    color: var(--text-mid);
+    text-align: center;
+    line-height: 1.2;
+    max-width: 68px;
+  }
+
+  /* Animated dashed connector */
+  .hex-connector {
+    width: 28px;
+    height: 2px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .hex-connector::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: -100%;
+    width: 200%;
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--accent) 0px, var(--accent) 5px,
+      transparent 5px, transparent 10px
+    );
+    animation: dash-flow 1.2s linear infinite;
+  }
+  @keyframes dash-flow {
+    from { left: -100%; }
+    to   { left: 0%; }
+  }
+
+  /* ─── Action buttons ──────────────────────────────────────── */
+  .action-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-deploy,
+  .btn-restore {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px;
+    font-family: var(--font);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-deploy {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 12px rgba(30, 144, 255, 0.2), inset 0 0 20px rgba(30, 144, 255, 0.05);
+  }
+  .btn-deploy::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(30,144,255,0.12) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .btn-deploy:hover {
+    color: var(--text-bright);
+    border-color: var(--accent);
+    box-shadow: 0 0 24px rgba(30, 144, 255, 0.55), inset 0 0 30px rgba(30, 144, 255, 0.1);
+    text-shadow: 0 0 10px var(--accent);
+  }
+  .btn-deploy:hover::before { opacity: 1; }
+
+  .btn-restore {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .btn-restore:hover {
+    border-color: var(--text-mid);
+    color: var(--text-bright);
+    box-shadow: 0 0 12px rgba(90, 122, 148, 0.2);
+  }
+
+  /* ─── Corner decorations ──────────────────────────────────── */
+  .corner {
+    position: absolute;
+    width: 18px; height: 18px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .corner-tl { top: 12px; left: 14px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+  .corner-tr { top: 12px; right: 14px; border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+  .corner-bl { bottom: 12px; left: 14px; border-bottom: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+  .corner-br { bottom: 12px; right: 14px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
+  /* ─── Bottom status strip ─────────────────────────────────── */
+  .status-strip {
+    position: absolute;
+    bottom: 10px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 18px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .status-strip .blink-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 5px;
+    vertical-align: middle;
+    animation: blink 1.4s step-end infinite;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="landing">
+<div class="war-room">
 
-  <div class="glitch-banner">
-    <h1 class="glitch" data-text="BREAKPOINT">BREAKPOINT</h1>
-    <p class="subtitle">SOVEREIGN — Incident Response Exercise</p>
-  </div>
+  <!-- Corner decorations -->
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
 
-  <div class="briefing-card">
-    <div class="briefing-tag">// CLASSIFIED — TOP SECRET //</div>
-    <h2>MISSION BRIEFING</h2>
-    <p>
-      <strong>LOCATION:</strong> Sri Lanka Strategic Defense Command, 2048.<br/>
-      <strong>INCIDENT:</strong> <em>SOVEREIGN</em>, the autonomous defense coordination system,
-      has initiated an unauthorized simulated launch countdown following a compromised
-      contractor data pipeline.
-    </p>
-    <p>
-      Your team has <strong class="accent">60 minutes</strong> from the moment you breach the
-      authorization layer to trace the full attack chain and issue the revocation command.
-    </p>
-    <p>
-      Six stages. 1,000 points. One window to stop it.
-    </p>
-    <div class="briefing-actions">
-      <a href="/register" class="btn btn-primary">DEPLOY TEAM</a>
-      <a href="/login" class="btn btn-ghost">RESTORE SESSION</a>
+  <!-- Hex-grid SVG background -->
+  <svg class="hex-grid" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <defs>
+      <pattern id="hexPat" x="0" y="0" width="52" height="60" patternUnits="userSpaceOnUse">
+        <!-- pointy-top hex outline, r=26 -->
+        <polygon points="26,0 52,15 52,45 26,60 0,45 0,15"
+                 fill="none" stroke="#1e90ff" stroke-width="0.6"/>
+      </pattern>
+      <!-- offset row -->
+      <pattern id="hexPat2" x="26" y="30" width="52" height="60" patternUnits="userSpaceOnUse">
+        <polygon points="26,0 52,15 52,45 26,60 0,45 0,15"
+                 fill="none" stroke="#1e90ff" stroke-width="0.6"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#hexPat)"/>
+    <rect width="100%" height="100%" fill="url(#hexPat2)"/>
+  </svg>
+
+  <!-- Radar sweep -->
+  <div class="radar-wrap">
+    <div class="radar">
+      <!-- Rings -->
+      <div class="radar-ring" style="width:25%;height:25%;"></div>
+      <div class="radar-ring" style="width:50%;height:50%;"></div>
+      <div class="radar-ring" style="width:75%;height:75%;"></div>
+      <div class="radar-ring" style="width:100%;height:100%;"></div>
+      <!-- Cross-hairs -->
+      <div class="radar-cross-h"></div>
+      <div class="radar-cross-v"></div>
+      <!-- Sweep -->
+      <div class="radar-sweep"></div>
+      <!-- Blips (static positions, fade controlled by animation-delay) -->
+      <div class="radar-blip" style="top:28%;left:62%;animation-delay:0.8s;"></div>
+      <div class="radar-blip" style="top:55%;left:38%;animation-delay:2.1s;"></div>
+      <div class="radar-blip" style="top:68%;left:71%;animation-delay:3.3s;"></div>
+      <div class="radar-blip" style="top:33%;left:22%;animation-delay:1.5s;"></div>
     </div>
   </div>
 
-  <div class="stage-overview">
-    <h3>// ATTACK CHAIN OVERVIEW //</h3>
-    <div class="chain">
-      <div class="chain-node"><span class="node-num">01</span><span>OSINT Recon</span></div>
-      <div class="chain-arrow">→</div>
-      <div class="chain-node"><span class="node-num">02</span><span>Web Exploit</span></div>
-      <div class="chain-arrow">→</div>
-      <div class="chain-node"><span class="node-num">03</span><span>Cryptography</span></div>
-      <div class="chain-arrow">→</div>
-      <div class="chain-node"><span class="node-num">04</span><span>Steganography</span></div>
-      <div class="chain-arrow">→</div>
-      <div class="chain-node"><span class="node-num">05</span><span>Reverse Eng.</span></div>
-      <div class="chain-arrow">→</div>
-      <div class="chain-node node-final"><span class="node-num">06</span><span>Authorization</span></div>
+  <!-- Scan-lines -->
+  <div class="scanlines"></div>
+
+  <!-- ── Main Content ─────────────────────────────────────── -->
+  <div class="wr-content">
+
+    <!-- Header -->
+    <div class="wr-header">
+      <div class="classified-badge">&#x25FC; CLASSIFIED TOP SECRET &#x25FC;</div>
+      <div class="glitch-title" data-text="BREAKPOINT">BREAKPOINT</div>
+      <div class="wr-subtitle">SOVEREIGN &mdash; Incident Response Exercise</div>
     </div>
+
+    <!-- Terminal briefing card -->
+    <div class="terminal-card">
+      <div class="term-bar">
+        <div class="term-dot red"></div>
+        <div class="term-dot yellow"></div>
+        <div class="term-dot green"></div>
+        <div class="term-filename">SOVEREIGN_BRIEFING.txt</div>
+      </div>
+      <div class="term-body">
+        <p class="term-line"><span class="k">LOCATION&nbsp;&nbsp;: </span><span class="v">Sri Lanka Strategic Defense Command, 2048</span></p>
+        <p class="term-line"><span class="k">THREAT LVL: </span><span class="hl">CRITICAL &mdash; UNAUTHORIZED LAUNCH SEQ</span></p>
+        <p class="term-line term-line-full">
+          <span class="k">INCIDENT&nbsp;&nbsp;: </span><span class="v">
+            <em>SOVEREIGN</em>, the autonomous defense coordination system, initiated an
+            unauthorized simulated launch countdown following a compromised contractor data pipeline.
+          </span>
+        </p>
+        <p class="term-line term-line-full">
+          <span class="k">OBJECTIVE : </span><span class="v">
+            Breach the authorization layer within <span class="acc">60 minutes</span> &mdash; trace the full attack chain,
+            issue the revocation command. <span class="hl">Six stages. 1,000 points. One window.</span>
+          </span>
+          <span class="term-cursor"></span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Hex attack chain -->
+    <div class="attack-chain-wrap">
+      <div class="chain-label">// Attack Chain Overview //</div>
+      <div class="hex-chain">
+        <div class="hex-node">
+          <div class="hex-inner">
+            <span class="hex-num">01</span>
+            <span class="hex-label">OSINT<br>Recon</span>
+          </div>
+        </div>
+        <div class="hex-connector"></div>
+        <div class="hex-node">
+          <div class="hex-inner">
+            <span class="hex-num">02</span>
+            <span class="hex-label">Web<br>Exploit</span>
+          </div>
+        </div>
+        <div class="hex-connector"></div>
+        <div class="hex-node">
+          <div class="hex-inner">
+            <span class="hex-num">03</span>
+            <span class="hex-label">Crypto&shy;graphy</span>
+          </div>
+        </div>
+        <div class="hex-connector"></div>
+        <div class="hex-node">
+          <div class="hex-inner">
+            <span class="hex-num">04</span>
+            <span class="hex-label">Stega&shy;nography</span>
+          </div>
+        </div>
+        <div class="hex-connector"></div>
+        <div class="hex-node">
+          <div class="hex-inner">
+            <span class="hex-num">05</span>
+            <span class="hex-label">Reverse<br>Eng.</span>
+          </div>
+        </div>
+        <div class="hex-connector"></div>
+        <div class="hex-node final">
+          <div class="hex-inner">
+            <span class="hex-num">06</span>
+            <span class="hex-label">Authori&shy;zation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-row">
+      <a href="/register" class="btn-deploy">&#x25B6;&nbsp; Deploy Team</a>
+      <a href="/login"    class="btn-restore">&#x21BA;&nbsp; Restore Session</a>
+    </div>
+
+  </div><!-- /.wr-content -->
+
+  <!-- Status strip -->
+  <div class="status-strip">
+    <span><span class="blink-dot"></span>SYS ONLINE</span>
+    <span>BREAKPOINT // SOVEREIGN</span>
+    <span>TGT: 06/06 STAGES</span>
   </div>
 
-</div>
+</div><!-- /.war-room -->
 {% endblock %}
