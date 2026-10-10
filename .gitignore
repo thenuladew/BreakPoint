@@ -14,7 +14,7 @@ env/
 stages/stage5-binary/src/sovereign_inject_x86
 stages/stage5-binary/src/*.o
 
-# Generated artifacts (built by generator scripts)
+# artifacts
 stages/stage3-crypto/transmission_log_48.txt
 stages/stage4-stego/dist/*.jpg
 stages/stage4-stego/dist/*.png
