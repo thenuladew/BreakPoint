@@ -159,17 +159,17 @@
                 
                 <div style="margin-top: 10px; margin-bottom: 15px;">
                   {% if stage.id == 1 %}
-                    <a href="http://localhost:8081" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: EXTERNAL NODE ]</a>
+                    <a href="http://{{ request.host.split(":")[0] }}:8081" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: EXTERNAL NODE ]</a>
                   {% elif stage.id == 2 %}
-                    <a href="http://localhost:8082" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: CONTRACTOR PORTAL ]</a>
+                    <a href="http://{{ request.host.split(":")[0] }}:8082" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: CONTRACTOR PORTAL ]</a>
                   {% elif stage.id == 3 %}
-                    <a href="http://localhost:8082/static/downloads/transmission_log_48.txt" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ DOWNLOAD: SECURE_COMMS_INTERCEPT ]</a>
+                    <a href="http://{{ request.host.split(":")[0] }}:8082/static/downloads/transmission_log_48.txt" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ DOWNLOAD: SECURE_COMMS_INTERCEPT ]</a>
                   {% elif stage.id == 4 %}
-                    <a href="http://localhost:8084" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: ARCHIVE NODE ]</a>
+                    <a href="http://{{ request.host.split(":")[0] }}:8084" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: ARCHIVE NODE ]</a>
                   {% elif stage.id == 5 %}
-                    <a href="http://localhost:8084/tools/sovereign_inject_x86" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ DOWNLOAD: SUSPICIOUS BINARY ]</a>
+                    <a href="http://{{ request.host.split(":")[0] }}:8084/tools/sovereign_inject_x86" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ DOWNLOAD: SUSPICIOUS BINARY ]</a>
                   {% elif stage.id == 6 %}
-                    <a href="http://localhost:8090" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: SOVEREIGN CORE ]</a>
+                    <a href="http://{{ request.host.split(":")[0] }}:8090" target="_blank" class="btn-intel" style="text-decoration:none; display:inline-block;">[ ESTABLISH CONNECTION: SOVEREIGN CORE ]</a>
                   {% endif %}
                 </div>
 

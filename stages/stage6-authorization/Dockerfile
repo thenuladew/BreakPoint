@@ -1,6 +1,8 @@
 FROM python:3.12-slim
 WORKDIR /app
-RUN pip install --no-cache-dir flask==3.0.3
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
+COPY static/ static/
 EXPOSE 5000
-CMD ["python", "app.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]

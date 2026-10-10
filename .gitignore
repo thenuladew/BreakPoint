@@ -35,3 +35,4 @@ stages/stage6-authorization/artifacts/sovereign_audit.log
 # OS
 .DS_Store
 Thumbs.db
+docs/walkthrough_stage6.md

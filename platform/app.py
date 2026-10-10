@@ -437,26 +437,28 @@ def api_status():
 
 @app.route("/api/check_stage6_access")
 def check_stage6_access():
-    """
-    Nginx auth_request endpoint.
-    Returns 200 if team has solved Stage 5 AND timer is active.
-    Returns 403 otherwise.
-    Token comes from X-Team-Token header forwarded by Nginx.
-    """
     token = request.headers.get("X-Team-Token")
     if not token:
-        abort(403)
+        token = session.get("team_token")
+    if not token:
+        return "No token", 403
+        
     team = get_team_from_token(token)
     if not team:
-        abort(403)
+        return f"Invalid team {token}", 403
 
     solved = get_solved_stages(team["id"])
     if 5 not in solved:
-        abort(403)
+        return f"Stage 5 not solved. Solved: {solved}", 403
 
     timer = get_timer(team["id"])
     if timer["expired"]:
-        abort(403)
+        return "Timer expired", 403
+        
+    return "OK", 200
+
+
+
 
     return "", 200
 
