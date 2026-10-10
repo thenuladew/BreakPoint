@@ -1,11 +1,11 @@
-# 🌐 BREAKPOINT – SOVEREIGN Incident Response CTF
+# BREAKPOINT – SOVEREIGN Incident Response CTF
 
 **BREAKPOINT** is a cyber defense and incident response Capture The Flag (CTF) environment. Designed as a comprehensive, immersive 6-stage challenge, players step into the role of a national cyber defense team responding to a critical incident: an unauthorized simulated launch countdown initiated by the autonomous strategic defense system, **SOVEREIGN**.
 
-## 📖 The Scenario
+## The Scenario
 *Sri Lanka, 2048.* Corrupted data has been introduced into the SOVEREIGN system via a compromised defense contractor pipeline. A countdown has started. You have 60 minutes to trace the attack chain—from external OSINT footprinting to reverse engineering malware and correlating forensic network traffic—to identify the rogue session and revoke the launch authorization.
 
-## ✨ Features
+## Features
 * **6 Custom-Built Stages:** Covering OSINT, Web Security (IDOR), Cryptography (Vigenère/Base64), Steganography, Reverse Engineering, and Network Forensics.
 * **Fully Dockerized Isolation:** Every stage runs in isolated Docker networks (`internal: true`) ensuring zero host egress or cross-stage contamination. All traffic flows through a hardened Nginx Edge Proxy.
 * **Cinematic CTF Platform:** A custom-built Flask/SQLite dashboard with a cyberpunk-inspired UI, live mission briefings, dynamic flag validation (salted SHA-256), and a penalty-based hint system.
@@ -13,7 +13,7 @@
 
 ---
 
-## 🚀 Quickstart Guide
+## Quickstart Guide
 
 ### Prerequisites
 * **Docker** & **Docker Compose** installed.
@@ -40,7 +40,7 @@
 
 ---
 
-## 🗺️ Stage Overview & Topology
+## Stage Overview & Topology
 
 | Stage | Domain | Title | Challenge Access |
 |---|---|---|---|
@@ -54,7 +54,7 @@
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 BreakPoint/
@@ -71,7 +71,7 @@ BreakPoint/
 └── docs/                    # Walkthroughs, manuals, and architecture guides
 ```
 
-## 📘 Walkthroughs & Solutions
+## Walkthroughs & Solutions
 
 If you are a CTF organizer, instructor, or a player who is completely stuck, you can find the complete master walkthrough covering all stages and flags in the `docs` directory:
 * **[Master Walkthrough Guide](docs/walkthrough_master.md)**
